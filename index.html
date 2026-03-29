@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOI — Auth0 Token Vault Agent Hub</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{vault:{400:'#34d399',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b'},sf:{0:'#060708',1:'#0c0e10',2:'#121516',3:'#191c1e',4:'#212527',5:'#292d2f'},amb:{400:'#fbbf24',500:'#f59e0b'}},fontFamily:{d:['Space Grotesk','sans-serif'],b:['DM Sans','sans-serif']}}}}
+</script>
+<style>
+*{scrollbar-width:thin;scrollbar-color:#191c1e transparent}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#191c1e;border-radius:3px}
+@property --ba{syntax:'<angle>';initial-value:0deg;inherits:false}
+body{overflow:hidden;height:100dvh}
+.nav-btn{color:#4a5c52;position:relative}.nav-btn:hover{color:#b0bab3;background:rgba(16,185,129,0.04)}.nav-btn.active{color:#10b981;background:rgba(16,185,129,0.06);font-weight:500}.nav-btn.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:22px;background:linear-gradient(180deg,#10b981,#065f46);border-radius:0 3px 3px 0}
+.sec{display:none}.sec.on{display:block;animation:si .4s ease forwards}
+@keyframes si{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pr{0%{transform:scale(.8);opacity:1}100%{transform:scale(2.2);opacity:0}}
+@keyframes tp{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+@keyframes rb{to{--ba:360deg}}
+@keyframes scan{0%{top:-100%}100%{top:200%}}
+@keyframes tg{0%,100%{text-shadow:0 0 10px rgba(16,185,129,.3)}50%{text-shadow:0 0 25px rgba(16,185,129,.6),0 0 50px rgba(16,185,129,.15)}}
+@keyframes dc{to{stroke-dashoffset:0}}
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sb{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes vg{0%,100%{opacity:.3;transform:scale(.9)}50%{opacity:.6;transform:scale(1.1)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.tg{animation:tg 2s ease-in-out infinite}
+.vg{animation:vg 2s ease-in-out infinite}
+.mc{position:relative;overflow:hidden}.mc::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 10%,rgba(16,185,129,.25) 50%,transparent 90%);opacity:0;transition:opacity .4s}.mc:hover::after{opacity:1}.mc:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.tc{position:relative;background:rgba(12,14,16,.95);border:1px solid #141e19;border-radius:14px;padding:20px;transition:all .35s cubic-bezier(.4,0,.2,1);overflow:hidden}.tc::before{content:'';position:absolute;inset:-1px;border-radius:inherit;background:conic-gradient(from var(--ba),transparent 55%,#10b981 75%,#fbbf24 85%,#06b6d4 92%,transparent 100%);z-index:-1;opacity:0;transition:opacity .5s}.tc:hover{border-color:rgba(16,185,129,.15);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.35),0 0 30px rgba(16,185,129,.03)}.tc:hover::before{opacity:1;animation:rb 3s linear infinite}
+.sd{position:relative}.sd.on::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid currentColor;animation:pr 2s ease-out infinite}
+.cb{max-width:78%;animation:si .3s ease forwards}.td{width:5px;height:5px;border-radius:50%;background:#3a4a42;display:inline-block;animation:tp 1.4s ease-in-out infinite}.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+.ac{background:rgba(12,14,16,.95);border:1px solid #141e19;border-radius:18px;padding:24px;transition:all .35s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}.ac::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 10%,rgba(16,185,129,.2) 50%,transparent 90%);opacity:0;transition:opacity .4s}.ac:hover{border-color:rgba(16,185,129,.15);transform:translateY(-3px);box-shadow:0 16px 50px rgba(0,0,0,.35)}.ac:hover::after{opacity:1}
+.lr{transition:background .15s}.lr:hover{background:rgba(16,185,129,.02)}
+.sl{position:absolute;top:-100%;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(16,185,129,.15),transparent);animation:scan 4s linear infinite}
+.hp{height:3px;border-radius:2px;overflow:hidden;background:#191c1e}.hp .fill{height:100%;border-radius:2px;transition:width 1.5s ease}
+.threat-row{animation:fu .3s ease forwards}
+@media(max-width:1024px){.side-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:40;opacity:0;pointer-events:none;transition:opacity .3s}.side-overlay.show{opacity:1;pointer-events:auto}.sidebar{position:fixed!important;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}.sidebar.open{transform:translateX(0)}.desk-only{display:none!important}}
+@media(max-width:640px){.mob-hide{display:none!important}.chat-side{display:none!important}.mc:hover{transform:none}.tc:hover{transform:none}.ac:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body class="bg-sf-0 text-[#e8ede9] font-b">
+
+<canvas id="ptc" class="fixed inset-0 z-0 pointer-events-none"></canvas>
+<div id="mg" class="fixed w-[400px] h-[400px] rounded-full pointer-events-none z-[1] hidden sm:block transition-all duration-300 ease-out" style="background:radial-gradient(circle,rgba(16,185,129,.04) 0%,transparent 70%);transform:translate(-50%,-50%);left:-500px;top:-500px"></div>
+
+<!-- LOADER -->
+<div id="ld" class="fixed inset-0 z-[200] bg-sf-0 flex flex-col items-center justify-center transition-all duration-700">
+<div class="relative mb-8">
+<svg width="110" height="130" viewBox="0 0 110 130" class="drop-shadow-2xl">
+<rect x="8" y="28" width="94" height="94" rx="8" fill="none" stroke="#1a2e24" stroke-width="2.5"/>
+<rect x="14" y="34" width="82" height="82" rx="5" fill="none" stroke="#0f1f18" stroke-width="1"/>
+<rect x="12" y="48" width="5" height="16" rx="2" fill="#1a2e24"/>
+<rect x="12" y="82" width="5" height="16" rx="2" fill="#1a2e24"/>
+<circle cx="58" cy="75" r="17" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="107" stroke-dashoffset="107" style="animation:dc 1.2s .3s ease forwards"/>
+<circle cx="58" cy="75" r="11" fill="none" stroke="#10b98140" stroke-width="1" stroke-dasharray="69" stroke-dashoffset="69" style="animation:dc .8s .8s ease forwards"/>
+<line x1="58" y1="64" x2="58" y2="58" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" style="animation:fu .3s 1.2s ease forwards;opacity:0"/>
+<circle cx="52" cy="69" r="2" fill="#10b981" style="animation:fu .2s 1.4s ease forwards;opacity:0"/>
+<circle cx="64" cy="69" r="2" fill="#10b981" style="animation:fu .2s 1.5s ease forwards;opacity:0"/>
+<circle cx="52" cy="81" r="2" fill="#10b981" style="animation:fu .2s 1.6s ease forwards;opacity:0"/>
+<circle cx="64" cy="81" r="2" fill="#10b981" style="animation:fu .2s 1.7s ease forwards;opacity:0"/>
+<text x="55" y="18" text-anchor="middle" fill="#10b981" font-family="Space Grotesk" font-size="20" font-weight="700" style="animation:fu .5s .1s ease forwards;opacity:0">KOI</text>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center"><div class="w-36 h-36 bg-vault-500/10 rounded-full blur-[60px] vg"></div></div>
+</div>
+<p class="font-d text-vault-400 text-2xl tracking-[0.4em] mb-2 tg">KOI</p>
+<p class="text-[#2e3e35] text-[10px] tracking-[0.25em] mb-8">AUTH0 TOKEN VAULT AGENT HUB</p>
+<div class="w-64 h-[2px] bg-sf-3 rounded-full overflow-hidden">
+<div id="lb" class="h-full rounded-full" style="width:0%;transition:width 2s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,#064e3b,#10b981,#fbbf24,#10b981,#064e3b);background-size:200% 100%;animation:sb 2s linear infinite"></div>
+</div>
+<div class="flex items-center gap-2 mt-4"><span class="w-1.5 h-1.5 rounded-full bg-vault-500 animate-pulse"></span><p id="ls" class="text-[#3a4a42] text-[10px] tracking-[0.2em]">INITIALIZING SECURE CONNECTION</p></div>
+<p class="text-[#1e2e26] text-[8px] mt-6 tracking-widest">BUILT BY SOMIA KHAN</p>
+</div>
+
+<!-- TOAST -->
+<div id="tb" class="fixed top-4 right-4 sm:top-6 sm:right-6 z-[150] flex flex-col gap-2 sm:gap-3 pointer-events-none"></div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div id="sov" class="side-overlay" onclick="toggleSB()"></div>
+
+<!-- MODAL -->
+<div id="mo" class="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md hidden items-center justify-center p-4" onclick="if(event.target===this)clM()">
+<div id="mc" class="bg-sf-2 border border-[#141e19] rounded-2xl w-full max-w-lg shadow-2xl shadow-black/60 transform scale-90 opacity-0 transition-all duration-300 max-h-[90vh] overflow-y-auto"></div>
+</div>
+
+<!-- NOTIF DROPDOWN -->
+<div id="nd" class="fixed z-[90] hidden" style="top:64px;right:16px">
+<div class="bg-sf-2 border border-[#141e19] rounded-2xl shadow-2xl shadow-black/50 w-80 overflow-hidden">
+<div class="px-4 py-3 border-b border-[#141e19] flex items-center justify-between"><span class="text-xs font-d font-semibold">Notifications</span><span class="text-[9px] text-vault-500 font-bold">3 NEW</span></div>
+<div class="max-h-64 overflow-y-auto">
+<div class="px-4 py-3 border-b border-[#0f1410] hover:bg-sf-3/30 transition-colors cursor-pointer"><div class="flex items-start gap-2.5"><div class="w-7 h-7 rounded-lg bg-vault-500/10 flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fa-solid fa-rotate text-vault-400 text-[9px]"></i></div><div><p class="text-[11px] text-[#b0bab3]">Google Cloud token rotated successfully</p><p class="text-[9px] text-[#2e3e35] mt-0.5">15 min ago</p></div></div></div>
+<div class="px-4 py-3 border-b border-[#0f1410] hover:bg-sf-3/30 transition-colors cursor-pointer"><div class="flex items-start gap-2.5"><div class="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fa-solid fa-shield-halved text-red-400 text-[9px]"></i></div><div><p class="text-[11px] text-[#b0bab3]">Blocked unauthorized access from 203.0.113.42</p><p class="text-[9px] text-[#2e3e35] mt-0.5">31 min ago</p></div></div></div>
+<div class="px-4 py-3 hover:bg-sf-3/30 transition-colors cursor-pointer"><div class="flex items-start gap-2.5"><div class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fa-solid fa-clock text-amber-400 text-[9px]"></i></div><div><p class="text-[11px] text-[#b0bab3]">AWS IAM key expires in 7 days</p><p class="text-[9px] text-[#2e3e35] mt-0.5">1 hour ago</p></div></div></div>
+</div>
+</div>
+</div>
+
+<!-- APP -->
+<div id="app" class="flex h-full opacity-0 transition-opacity duration-1000 relative z-10">
+
+<!-- SIDEBAR -->
+<aside id="sb" class="sidebar w-[260px] bg-sf-1/95 backdrop-blur-xl border-r border-[#141e19] flex flex-col flex-shrink-0 relative lg:relative lg:transform-none lg:z-auto">
+<div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-vault-500/30 to-transparent"></div>
+<div class="h-16 flex items-center gap-3 px-5 border-b border-[#141e19]">
+<div class="relative"><div class="w-9 h-9 rounded-xl bg-gradient-to-br from-vault-600 via-vault-700 to-vault-900 flex items-center justify-center shadow-lg shadow-vault-900/40"><span class="font-d font-bold text-white text-sm">K</span></div><span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-vault-500 rounded-full border-2 border-sf-1"></span></div>
+<div class="flex-1"><h1 class="font-d font-bold text-[15px] tracking-wider text-[#e8ede9]">KOI<span class="text-vault-500">.</span></h1><p class="text-[7px] tracking-[0.25em] text-vault-700 font-bold">TOKEN VAULT HUB</p></div>
+<button onclick="toggleSB()" class="lg:hidden w-8 h-8 rounded-lg bg-sf-3 flex items-center justify-center text-[#4a5c52]"><i class="fa-solid fa-xmark text-sm"></i></button>
+</div>
+<nav class="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
+<p class="text-[8px] tracking-[0.2em] text-[#3a4a42] font-bold px-3 mb-2.5">OVERVIEW</p>
+<button onclick="go('dashboard');toggleSB()" data-n="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200"><i class="fa-solid fa-grid-2 w-5 text-center text-[11px]"></i><span>Dashboard</span></button>
+<button onclick="go('vault');toggleSB()" data-n="vault" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200"><i class="fa-solid fa-vault w-5 text-center text-[11px]"></i><span>Token Vault</span><span class="ml-auto bg-vault-500/10 text-vault-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-vault-500/10">8</span></button>
+<button onclick="go('agents');toggleSB()" data-n="agents" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200"><i class="fa-solid fa-robot w-5 text-center text-[11px]"></i><span>AI Agents</span></button>
+<button onclick="go('chat');toggleSB()" data-n="chat" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200"><i class="fa-solid fa-comments w-5 text-center text-[11px]"></i><span>Agent Chat</span></button>
+<p class="text-[8px] tracking-[0.2em] text-[#3a4a42] font-bold px-3 mb-2.5 mt-6">SYSTEM</p>
+<button onclick="go('logs');toggleSB()" data-n="logs" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200"><i class="fa-solid fa-scroll w-5 text-center text-[11px]"></i><span>Audit Logs</span></button>
+<button onclick="go('threats');toggleSB()" data-n="threats" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200"><i class="fa-solid fa-triangle-exclamation w-5 text-center text-[11px]"></i><span>Threat Monitor</span><span class="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse"></span></button>
+</nav>
+<div class="p-4 border-t border-[#141e19]">
+<div class="flex items-center gap-3 mb-2.5">
+<div class="relative"><div class="w-9 h-9 rounded-full bg-gradient-to-br from-vault-500 via-emerald-600 to-amb-500 flex items-center justify-center text-white font-bold text-[10px] shadow-lg shadow-vault-900/30">SK</div><span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-vault-500 rounded-full border-2 border-sf-1"></span></div>
+<div class="flex-1 min-w-0"><p class="text-[13px] font-semibold truncate">Somia Khan</p><p class="text-[9px] text-[#3a4a42]">Vault Administrator</p></div>
+</div>
+<div class="text-center pt-2 border-t border-[#141e19]"><p class="text-[7px] tracking-[0.3em] text-[#1a2a22] font-medium">CRAFTED BY SOMIA KHAN</p></div>
+</div>
+</aside>
+
+<!-- MAIN -->
+<div class="flex-1 flex flex-col overflow-hidden relative">
+<div class="absolute top-[-25%] right-[-15%] w-[500px] h-[500px] bg-vault-900/10 rounded-full blur-[180px] pointer-events-none"></div>
+<div class="absolute bottom-[-20%] left-[5%] w-[400px] h-[400px] bg-amb-500/[0.02] rounded-full blur-[150px] pointer-events-none"></div>
+
+<!-- HEADER -->
+<header class="h-14 sm:h-16 bg-sf-1/60 backdrop-blur-2xl border-b border-[#141e19] flex items-center justify-between px-4 sm:px-6 flex-shrink-0 relative z-20">
+<div class="flex items-center gap-2 sm:gap-3">
+<button onclick="toggleSB()" class="lg:hidden w-9 h-9 rounded-xl bg-sf-2/80 border border-[#141e19] flex items-center justify-center text-[#4a5c52] hover:text-vault-400 transition-colors"><i class="fa-solid fa-bars text-sm"></i></button>
+<div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm"><span class="text-[#3a4a42]">Hub</span><i class="fa-solid fa-chevron-right text-[6px] text-[#1e2e26]"></i><span id="bc" class="text-[#e8ede9] font-medium text-[11px] sm:text-[13px]">Dashboard</span></div>
+</div>
+<div class="flex items-center gap-2 sm:gap-3">
+<div id="st" class="text-[10px] text-[#3a4a42] font-mono tracking-wider w-14 text-center mob-hide"></div>
+<div id="stmr" class="hidden sm:flex items-center gap-1.5 text-[10px] text-[#3a4a42] mob-hide"><i class="fa-solid fa-stopwatch text-[8px] text-vault-700"></i><span id="stm">00:00:00</span></div>
+<button onclick="toggleNotif()" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sf-2/80 border border-[#141e19] flex items-center justify-center text-[#3a4a42] hover:text-vault-400 hover:border-vault-600/20 transition-all"><i class="fa-solid fa-bell text-[12px] sm:text-[13px]"></i><span class="absolute -top-1 -right-1 w-[16px] h-[16px] sm:w-[18px] sm:h-[18px] bg-vault-500 rounded-full text-[7px] sm:text-[8px] font-bold text-sf-0 flex items-center justify-center shadow-lg shadow-vault-900/40">3</span></button>
+<div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-vault-900/20 border border-vault-700/20"><span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vault-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-vault-500"></span></span><span class="text-vault-400 text-[10px] font-semibold tracking-wide">Vault Connected</span></div>
+</div>
+</header>
+
+<!-- CONTENT -->
+<main class="flex-1 overflow-y-auto" id="ms">
+
+<!-- DASHBOARD -->
+<section id="s-dashboard" class="sec on p-4 sm:p-6 space-y-4 sm:space-y-6">
+<div class="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-sf-2 via-sf-2 to-sf-3 border border-[#141e19] p-4 sm:p-6">
+<div class="absolute top-0 right-0 w-60 h-60 bg-vault-500/[0.04] rounded-full blur-[80px]"></div>
+<div class="absolute inset-0 pointer-events-none overflow-hidden"><div class="sl"></div></div>
+<div class="relative z-10"><p class="text-[9px] sm:text-[10px] tracking-[0.2em] text-vault-600 font-bold mb-1.5 sm:mb-2">WELCOME BACK</p><h2 class="font-d font-bold text-xl sm:text-2xl text-[#e8ede9] mb-1">Somia Khan</h2><p class="text-[11px] sm:text-sm text-[#5a6a62]">Your AI agents are online and securely connected to the Token Vault.</p>
+<div class="flex items-center gap-3 sm:gap-4 mt-3 text-[9px] sm:text-[11px] text-[#3a4a42]"><span><i class="fa-solid fa-shield-halved text-vault-700 mr-1"></i>0 Threats Today</span><span class="mob-hide"><i class="fa-solid fa-clock text-vault-700 mr-1"></i>Uptime 99.97%</span><span class="mob-hide"><i class="fa-solid fa-server text-vault-700 mr-1"></i>Auth0 Connected</span></div></div>
+</div>
+
+<!-- Threat Alert Banner (NEW) -->
+<div class="bg-red-500/[0.06] border border-red-500/15 rounded-xl p-3 sm:p-4 flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-triangle-exclamation text-red-400 text-xs"></i></div>
+<div class="flex-1 min-w-0"><p class="text-[11px] sm:text-xs font-semibold text-red-300">Security Alert</p><p class="text-[10px] sm:text-[11px] text-red-400/70 mt-0.5">847 unauthorized access attempts blocked from IP range 203.0.113.0/24 in the last hour. All tokens secured.</p></div>
+<button onclick="this.closest('div.bg-red-500\\/\\[0.06\\]').style.display='none'" class="text-red-400/50 hover:text-red-400 transition-colors flex-shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+</div>
+
+<!-- Metrics -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+<div class="mc group bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 transition-all duration-300 cursor-default"><div class="absolute top-0 right-0 w-20 h-20 bg-vault-500/[0.03] rounded-full blur-[40px] group-hover:bg-vault-500/[0.06] transition-all duration-500"></div><div class="relative z-10"><div class="flex items-center justify-between mb-3 sm:mb-4"><div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-vault-500/[0.08] border border-vault-500/10 flex items-center justify-center"><i class="fa-solid fa-key text-vault-400 text-xs sm:text-sm"></i></div><span class="text-[8px] sm:text-[9px] text-vault-500 bg-vault-500/8 px-2 py-0.5 rounded-full font-bold tracking-wide hidden sm:inline">+2 THIS WEEK</span></div><p class="text-2xl sm:text-[32px] font-d font-bold text-[#e8ede9] leading-none ctr" data-t="8">0</p><p class="text-[10px] sm:text-[11px] text-[#4a5c52] mt-1.5 sm:mt-2 tracking-wide">Tokens Secured</p></div></div>
+<div class="mc group bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 transition-all duration-300 cursor-default"><div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/[0.03] rounded-full blur-[40px] group-hover:bg-cyan-500/[0.06] transition-all duration-500"></div><div class="relative z-10"><div class="flex items-center justify-between mb-3 sm:mb-4"><div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-cyan-500/[0.08] border border-cyan-500/10 flex items-center justify-center"><i class="fa-solid fa-robot text-cyan-400 text-xs sm:text-sm"></i></div></div><p class="text-2xl sm:text-[32px] font-d font-bold text-[#e8ede9] leading-none ctr" data-t="5">0</p><p class="text-[10px] sm:text-[11px] text-[#4a5c52] mt-1.5 sm:mt-2 tracking-wide">Active Agents</p></div></div>
+<div class="mc group bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 transition-all duration-300 cursor-default"><div class="absolute top-0 right-0 w-20 h-20 bg-amb-500/[0.03] rounded-full blur-[40px] group-hover:bg-amb-500/[0.06] transition-all duration-500"></div><div class="relative z-10"><div class="flex items-center justify-between mb-3 sm:mb-4"><div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amb-500/[0.08] border border-amb-500/10 flex items-center justify-center"><i class="fa-solid fa-shield-halved text-amb-400 text-xs sm:text-sm"></i></div></div><p class="text-2xl sm:text-[32px] font-d font-bold text-[#e8ede9] leading-none"><span class="ctr" data-t="96">0</span><span class="text-base sm:text-lg text-[#4a5c52] font-normal">/100</span></p><p class="text-[10px] sm:text-[11px] text-[#4a5c52] mt-1.5 sm:mt-2 tracking-wide">Vault Score</p></div></div>
+<div class="mc group bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 transition-all duration-300 cursor-default"><div class="absolute top-0 right-0 w-20 h-20 bg-violet-500/[0.03] rounded-full blur-[40px] group-hover:bg-violet-500/[0.06] transition-all duration-500"></div><div class="relative z-10"><div class="flex items-center justify-between mb-3 sm:mb-4"><div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-violet-500/[0.08] border border-violet-500/10 flex items-center justify-center"><i class="fa-solid fa-arrow-up-right-dots text-violet-400 text-xs sm:text-sm"></i></div><span class="text-[8px] sm:text-[9px] text-vault-500 bg-vault-500/8 px-2 py-0.5 rounded-full font-bold tracking-wide hidden sm:inline">+18.3%</span></div><p class="text-2xl sm:text-[32px] font-d font-bold text-[#e8ede9] leading-none"><span class="ctr" data-t="12">0</span><span class="text-base sm:text-lg text-[#4a5c52] font-normal">.8K</span></p><p class="text-[10px] sm:text-[11px] text-[#4a5c52] mt-1.5 sm:mt-2 tracking-wide">API Calls (24h)</p></div></div>
+</div>
+
+<!-- Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+<div class="lg:col-span-2 bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 relative overflow-hidden"><div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-vault-500/20 to-transparent"></div><div class="flex items-center justify-between mb-4 sm:mb-5"><div><h3 class="font-d font-semibold text-xs sm:text-sm">Token Usage Over Time</h3><p class="text-[10px] sm:text-[11px] text-[#3a4a42] mt-0.5">API calls routed through Auth0 Token Vault</p></div><div class="flex gap-0.5 sm:gap-1 bg-sf-3/50 rounded-lg p-0.5"><button class="text-[9px] sm:text-[10px] px-2 sm:px-3 py-1 sm:py-1.5 rounded-md bg-vault-500/10 text-vault-400 font-semibold">7D</button><button class="text-[9px] sm:text-[10px] px-2 sm:px-3 py-1 sm:py-1.5 rounded-md text-[#3a4a42]">30D</button><button class="text-[9px] sm:text-[10px] px-2 sm:px-3 py-1 sm:py-1.5 rounded-md text-[#3a4a42] mob-hide">90D</button></div></div><canvas id="uc" height="160"></canvas></div>
+<div class="bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 relative overflow-hidden"><div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent"></div><h3 class="font-d font-semibold text-xs sm:text-sm mb-3 sm:mb-4">Agent Status</h3><div class="space-y-1.5 sm:space-y-2" id="asl"></div></div>
+</div>
+
+<!-- Token Health (NEW) -->
+<div class="bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amb-500/20 to-transparent"></div>
+<h3 class="font-d font-semibold text-xs sm:text-sm mb-3 sm:mb-4">Token Health Overview</h3>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4" id="thp"></div>
+</div>
+
+<!-- Activity -->
+<div class="bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-vault-500/15 to-transparent"></div>
+<h3 class="font-d font-semibold text-xs sm:text-sm mb-3 sm:mb-4">Recent Vault Activity</h3>
+<div class="space-y-0.5 sm:space-y-1" id="af"></div>
+</div>
+<div class="text-center py-1 sm:py-2"><p class="text-[7px] sm:text-[8px] tracking-[0.3em] text-[#1a2a22]">KOI AI — AUTH0 TOKEN VAULT — SOMIA KHAN</p></div>
+</section>
+
+<!-- TOKEN VAULT -->
+<section id="s-vault" class="sec p-4 sm:p-6 space-y-4 sm:space-y-6">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-5">
+<div class="flex items-center gap-4">
+<div class="relative flex-shrink-0"><svg width="80" height="80" viewBox="0 0 120 120" class="transform -rotate-90 drop-shadow-lg"><circle cx="60" cy="60" r="52" fill="none" stroke="#191c1e" stroke-width="8"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#sg)" stroke-width="8" stroke-dasharray="326.73" stroke-dashoffset="13.07" stroke-linecap="round"/><defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#065f46"/><stop offset="50%" stop-color="#10b981"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient></defs></svg><div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-xl sm:text-2xl font-d font-bold text-vault-400">96</span><span class="text-[7px] tracking-[0.2em] text-[#3a4a42]">SCORE</span></div></div>
+<div><h2 class="font-d font-bold text-xl sm:text-2xl text-[#e8ede9]">Auth0 Token Vault</h2><p class="text-[11px] sm:text-xs text-[#4a5c52] mt-1">Secure credential storage with automatic rotation and audit logging</p><div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2"><span class="flex items-center gap-1 text-[8px] sm:text-[9px] text-vault-400 bg-vault-500/8 border border-vault-500/10 px-2 py-0.5 sm:py-1 rounded-lg font-semibold"><i class="fa-solid fa-lock text-[6px] sm:text-[7px]"></i>AES-256-GCM</span><span class="flex items-center gap-1 text-[8px] sm:text-[9px] text-cyan-400 bg-cyan-500/8 border border-cyan-500/10 px-2 py-0.5 sm:py-1 rounded-lg font-semibold"><i class="fa-solid fa-rotate text-[6px] sm:text-[7px]"></i>AUTO-ROTATE</span><span class="flex items-center gap-1 text-[8px] sm:text-[9px] text-amb-400 bg-amb-500/8 border border-amb-500/10 px-2 py-0.5 sm:py-1 rounded-lg font-semibold mob-hide"><i class="fa-solid fa-eye text-[6px] sm:text-[7px]"></i>AUDIT TRAIL</span></div></div>
+</div>
+<button onclick="opAT()" class="flex items-center gap-2 bg-gradient-to-r from-vault-600 to-vault-700 hover:from-vault-500 hover:to-vault-600 text-white px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 shadow-xl shadow-vault-900/40 hover:-translate-y-0.5 justify-center"><i class="fa-solid fa-plus text-[10px] sm:text-xs"></i>Add Token</button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4" id="tg"></div>
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4">
+<div class="lg:col-span-3 bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 relative overflow-hidden"><div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-vault-500/15 to-transparent"></div><h3 class="font-d font-semibold text-xs sm:text-sm mb-3 sm:mb-4">Recent Token Access</h3><div class="space-y-0.5 sm:space-y-1 max-h-60 sm:max-h-72 overflow-y-auto pr-1" id="val"></div></div>
+<div class="lg:col-span-2 bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl p-4 sm:p-5 relative overflow-hidden"><div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amb-500/15 to-transparent"></div><h3 class="font-d font-semibold text-xs sm:text-sm mb-3 sm:mb-4">Requests per Token</h3><canvas id="bc" height="200"></canvas></div>
+</div>
+<div class="text-center py-1 sm:py-2"><p class="text-[7px] sm:text-[8px] tracking-[0.3em] text-[#1a2a22]">AUTH0 TOKEN VAULT — SOMIA KHAN</p></div>
+</section>
+
+<!-- AGENTS -->
+<section id="s-agents" class="sec p-4 sm:p-6 space-y-4 sm:space-y-6">
+<div class="flex items-center justify-between"><div><h2 class="font-d font-bold text-xl sm:text-2xl text-[#e8ede9]">AI Agent Fleet</h2><p class="text-[10px] sm:text-xs text-[#4a5c52] mt-1">Each agent scoped to specific tokens from the Auth0 Token Vault</p></div><div class="hidden sm:flex items-center gap-2 text-[10px] text-[#3a4a42] bg-sf-2/60 border border-[#141e19] rounded-lg px-3 py-2"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vault-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-vault-500"></span></span>All 5 agents operational</div></div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5" id="ag"></div>
+<div class="text-center py-1 sm:py-2"><p class="text-[7px] sm:text-[8px] tracking-[0.3em] text-[#1a2a22]">KOI AGENTS — SOMIA KHAN</p></div>
+</section>
+
+<!-- CHAT -->
+<section id="s-chat" class="sec flex flex-col" style="height:100%">
+<div class="flex-1 flex flex-col min-h-0">
+<div class="h-14 sm:h-16 bg-sf-1/60 backdrop-blur-2xl border-b border-[#141e19] flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+<div class="flex items-center gap-3"><select id="cas" class="bg-sf-2/80 border border-[#141e19] rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-[12px] sm:text-[13px] text-[#e8ede9] focus:outline-none focus:border-vault-600/40 appearance-none cursor-pointer pr-8 font-medium max-w-[180px]" style="background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%233a4a42%22 stroke-width=%222%22><polyline points=%226 9 12 15 18 9%22/></svg>');background-repeat:no-repeat;background-position:right 10px center;"><option value="research">Research Agent</option><option value="code">Code Agent</option><option value="data">Data Agent</option><option value="comms">Communication Agent</option><option value="finance">Finance Agent</option></select><span class="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-vault-400 font-medium mob-hide"><span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vault-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-vault-500"></span></span>Online</span></div>
+<div class="flex items-center gap-2 text-[9px] sm:text-[10px] text-[#3a4a42] bg-sf-3/50 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 border border-[#141e19] mob-hide"><i class="fa-solid fa-shield-halved text-vault-700"></i><span>Vault Secured</span></div>
+</div>
+<div id="cm" class="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4"></div>
+<div class="p-3 sm:p-4 bg-sf-1/40 backdrop-blur-xl border-t border-[#141e19] flex-shrink-0">
+<div class="flex gap-1.5 sm:gap-2 mb-2 sm:mb-3 overflow-x-auto pb-1 mob-hide" id="qa">
+<button onclick="qs('Analyze the latest security vulnerabilities in our repositories')" class="flex-shrink-0 text-[9px] sm:text-[10px] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-[#141e19] text-[#4a5c52] hover:text-vault-400 hover:border-vault-600/20 transition-all whitespace-nowrap"><i class="fa-solid fa-bug mr-1"></i>Vulnerabilities</button>
+<button onclick="qs('Generate a comprehensive financial report for this month')" class="flex-shrink-0 text-[9px] sm:text-[10px] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-[#141e19] text-[#4a5c52] hover:text-vault-400 hover:border-vault-600/20 transition-all whitespace-nowrap"><i class="fa-solid fa-chart-pie mr-1"></i>Finance Report</button>
+<button onclick="qs('Summarize all Slack conversations from today')" class="flex-shrink-0 text-[9px] sm:text-[10px] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-[#141e19] text-[#4a5c52] hover:text-vault-400 hover:border-vault-600/20 transition-all whitespace-nowrap"><i class="fa-solid fa-message mr-1"></i>Summarize</button>
+<button onclick="qs('Run ML analysis on the latest dataset')" class="flex-shrink-0 text-[9px] sm:text-[10px] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-[#141e19] text-[#4a5c52] hover:text-vault-400 hover:border-vault-600/20 transition-all whitespace-nowrap"><i class="fa-solid fa-brain mr-1"></i>ML Pipeline</button>
+<button onclick="qs('Review my pending pull requests')" class="flex-shrink-0 text-[9px] sm:text-[10px] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-[#141e19] text-[#4a5c52] hover:text-vault-400 hover:border-vault-600/20 transition-all whitespace-nowrap"><i class="fa-solid fa-code-branch mr-1"></i>Review PRs</button>
+</div>
+<div class="flex items-end gap-2 sm:gap-3"><div class="flex-1 relative"><textarea id="ci" rows="1" placeholder="Ask the agent..." class="w-full bg-sf-2/80 border border-[#141e19] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-[12px] sm:text-[13px] text-[#e8ede9] placeholder-[#3a4a42] focus:outline-none focus:border-vault-600/40 resize-none transition-all" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sc()}"></textarea></div><button onclick="sc()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-vault-600 to-vault-700 hover:from-vault-500 hover:to-vault-600 text-white flex items-center justify-center transition-all flex-shrink-0 shadow-xl shadow-vault-900/40 active:scale-95"><i class="fa-solid fa-paper-plane text-xs sm:text-sm"></i></button></div>
+<div id="cti" class="flex items-center gap-2 mt-2 opacity-0 transition-opacity duration-500 overflow-hidden"><span class="text-[8px] sm:text-[9px] text-[#3a4a42] tracking-wide flex-shrink-0">VAULT:</span><div id="ctu" class="flex gap-1 sm:gap-1.5 overflow-x-auto"></div></div>
+</div>
+</div>
+</section>
+
+<!-- LOGS -->
+<section id="s-logs" class="sec p-4 sm:p-6 space-y-3 sm:space-y-4">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4"><div><h2 class="font-d font-bold text-xl sm:text-2xl text-[#e8ede9]">Audit Logs</h2><p class="text-[10px] sm:text-xs text-[#4a5c52] mt-1">Complete audit trail of all Token Vault access events</p></div><div class="flex gap-2"><select class="bg-sf-2/60 border border-[#141e19] rounded-xl px-3 py-2 text-[10px] sm:text-[11px] text-[#4a5c52] focus:outline-none"><option>All Events</option><option>Token Access</option><option>Token Rotation</option><option>Agent Action</option><option>Security Alert</option></select><button class="bg-sf-2/60 border border-[#141e19] rounded-xl px-3 py-2 text-[10px] sm:text-[11px] text-[#4a5c52] hover:text-vault-400 transition-all mob-hide"><i class="fa-solid fa-download mr-1"></i>Export</button></div></div>
+<div class="bg-sf-2/60 backdrop-blur border border-[#141e19] rounded-xl overflow-hidden relative"><div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-vault-500/15 to-transparent"></div><div class="overflow-x-auto"><table class="w-full text-sm min-w-[700px]"><thead><tr class="border-b border-[#141e19] text-[8px] sm:text-[9px] tracking-[0.15em] text-[#3a4a42] uppercase"><th class="text-left px-4 sm:px-5 py-3 font-bold">Time</th><th class="text-left px-4 sm:px-5 py-3 font-bold">Event</th><th class="text-left px-4 sm:px-5 py-3 font-bold">Agent</th><th class="text-left px-4 sm:px-5 py-3 font-bold">Token</th><th class="text-left px-4 sm:px-5 py-3 font-bold">Status</th><th class="text-left px-4 sm:px-5 py-3 font-bold">Details</th></tr></thead><tbody id="ltb"></tbody></table></div></div>
+<div class="text-center py-1 sm:py-2"><p class="text-[7px] sm:text-[8px] tracking-[0.3em] text-[#1a2a22]">AUDIT — AUTH0 — SOMIA KHAN</p></div>
+</section>
+
+<!-- THREAT MONITOR (NEW SECTION) -->
+<section id="s-threats" class="sec p-4 sm:p-6 space-y-4 sm:space-y-6">
+<div class="flex items-center justify-between"><div><h2 class="font-d font-bold text-xl sm:text-2xl text-[#e8ede9]">Threat Monitor</h2><p class="text-[10px] sm:text-xs text-[#4a5c52] mt-1">Real-time security threat detection powered by Token Vault analytics</p></div><div class="flex items-center gap-2 text-[10px] text-red-400 bg-red-500/[0.06] border border-red-500/15 rounded-lg px-3 py-2 font-semibold"><i class="fa-solid fa-circle-radiation text-[9px] animate-pulse"></i>LIVE MONITORING</div></div>
+<!-- Threat Stats -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+<div class="bg-sf-2/60 border border-red-500/10 rounded-xl p-4"><p class="text-[9px] text-[#3a4a42] tracking-wider font-bold mb-2">BLOCKED TODAY</p><p class="text-2xl font-d font-bold text-red-400">847</p><p class="text-[10px] text-red-400/60 mt-1"><i class="fa-solid fa-arrow-up text-[8px] mr-0.5"></i>+12% from yesterday</p></div>
+<div class="bg-sf-2/60 border border-amb-500/10 rounded-xl p-4"><p class="text-[9px] text-[#3a4a42] tracking-wider font-bold mb-2">SUSPICIOUS IPs</p><p class="text-2xl font-d font-bold text-amb-400">23</p><p class="text-[10px] text-amb-400/60 mt-1"><i class="fa-solid fa-eye text-[8px] mr-0.5"></i>Under observation</p></div>
+<div class="bg-sf-2/60 border border-vault-500/10 rounded-xl p-4"><p class="text-[9px] text-[#3a4a42] tracking-wider font-bold mb-2">TOKENS PROTECTED</p><p class="text-2xl font-d font-bold text-vault-400">8/8</p><p class="text-[10px] text-vault-400/60 mt-1"><i class="fa-solid fa-check text-[8px] mr-0.5"></i>100% coverage</p></div>
+<div class="bg-sf-2/60 border border-cyan-500/10 rounded-xl p-4"><p class="text-[9px] text-[#3a4a42] tracking-wider font-bold mb-2">AVG RESPONSE</p><p class="text-2xl font-d font-bold text-cyan-400">12ms</p><p class="text-[10px] text-cyan-400/60 mt-1"><i class="fa-solid fa-bolt text-[8px] mr-0.5"></i>Below threshold</p></div>
+</div>
+<!-- Live Threat Feed -->
+<div class="bg-sf-2/60 border border-[#141e19] rounded-xl p-4 sm:p-5 relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent"></div>
+<div class="flex items-center justify-between mb-4"><h3 class="font-d font-semibold text-xs sm:text-sm">Live Threat Feed</h3><span class="flex items-center gap-1.5 text-[9px] text-red-400 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>Real-time</span></div>
+<div class="space-y-1.5" id="tfeed"></div>
+</div>
+<div class="text-center py-1 sm:py-2"><p class="text-[7px] sm:text-[8px] tracking-[0.3em] text-[#1a2a22]">THREAT MONITOR — AUTH0 — SOMIA KHAN</p></div>
+</section>
+
+</main>
+</div>
+</div>
+
+<script>
+const T=[
+{id:'openai',name:'OpenAI',icon:'fa-brands fa-openai',color:'#10a37f',type:'OAuth 2.0 Bearer',status:'active',scopes:['chat','completions','embeddings','fine-tuning'],masked:'sk-proj-••••••••••••3f8a',lastUsed:'2 min ago',requests:4821,autoRefresh:true,health:98},
+{id:'anthropic',name:'Anthropic Claude',icon:'fa-solid fa-brain',color:'#d4a574',type:'API Key',status:'active',scopes:['messages','completions'],masked:'sk-ant-••••••••••••7b2e',lastUsed:'5 min ago',requests:2134,autoRefresh:false,health:95},
+{id:'github',name:'GitHub',icon:'fa-brands fa-github',color:'#e8ede9',type:'OAuth 2.0',status:'active',scopes:['repo','read:org','workflow'],masked:'ghp_••••••••••••9c4d',lastUsed:'8 min ago',requests:1892,autoRefresh:true,health:100},
+{id:'slack',name:'Slack',icon:'fa-brands fa-slack',color:'#e01e5a',type:'OAuth 2.0',status:'active',scopes:['chat:write','channels:read','users:read'],masked:'xoxb-••••••••••••1e7f',lastUsed:'12 min ago',requests:967,autoRefresh:true,health:92},
+{id:'gcloud',name:'Google Cloud',icon:'fa-brands fa-google',color:'#4285f4',type:'Service Account',status:'rotating',scopes:['compute','storage','ml','vision'],masked:'sa-••••••••••••5a2c',lastUsed:'15 min ago',requests:1456,autoRefresh:true,health:78},
+{id:'stripe',name:'Stripe',icon:'fa-brands fa-stripe-s',color:'#635bff',type:'API Key',status:'active',scopes:['charges','customers','subscriptions'],masked:'sk_live_••••••••••••8d3b',lastUsed:'23 min ago',requests:634,autoRefresh:false,health:100},
+{id:'notion',name:'Notion',icon:'fa-solid fa-n',color:'#e8ede9',type:'OAuth 2.0',status:'active',scopes:['read','write','insert'],masked:'ntn_••••••••••••4f6a',lastUsed:'31 min ago',requests:423,autoRefresh:true,health:97},
+{id:'aws',name:'AWS',icon:'fa-brands fa-aws',color:'#ff9900',type:'IAM Access Key',status:'expiring',scopes:['s3','lambda','bedrock','rekognition'],masked:'AKIA••••••••••••2e8d',lastUsed:'45 min ago',requests:519,autoRefresh:true,health:45}
+];
+const A=[
+{id:'research',name:'Research Agent',icon:'fa-solid fa-microscope',color:'#10b981',status:'online',desc:'Deep web research, GitHub repo analysis, and comprehensive documentation generation using vault credentials.',tokens:['openai','github','notion'],capabilities:['Web Research','Repo Analysis','Doc Generation','Citation Tracking'],tasks:147,lastActive:'2 min ago'},
+{id:'code',name:'Code Agent',icon:'fa-solid fa-code',color:'#22d3ee',status:'online',desc:'Code generation, review, and debugging. Creates pull requests and runs CI/CD via GitHub integration.',tokens:['openai','anthropic','github'],capabilities:['Code Generation','Code Review','PR Creation','CI/CD Pipeline'],tasks:312,lastActive:'5 min ago'},
+{id:'data',name:'Data Agent',icon:'fa-solid fa-chart-line',color:'#f59e0b',status:'online',desc:'Dataset processing, ML pipelines on cloud infra, data visualizations and statistical reports.',tokens:['openai','gcloud','aws'],capabilities:['Data Analysis','ML Pipelines','Visualization','Stat Reports'],tasks:89,lastActive:'15 min ago'},
+{id:'comms',name:'Communication Agent',icon:'fa-solid fa-tower-broadcast',color:'#e01e5a',status:'online',desc:'Summarizes conversations, posts updates, manages notifications, syncs Slack and Notion.',tokens:['openai','slack','notion'],capabilities:['Message Summary','Channel Mgmt','Notifications','Cross-Sync'],tasks:234,lastActive:'12 min ago'},
+{id:'finance',name:'Finance Agent',icon:'fa-solid fa-coins',color:'#635bff',status:'online',desc:'Payment monitoring, financial reports, subscription tracking, and billing anomaly alerts.',tokens:['openai','stripe'],capabilities:['Payment Monitor','Financial Reports','Subscription Tracking','Anomaly Alerts'],tasks:56,lastActive:'23 min ago'}
+];
+const CR={
+research:[{text:"I've analyzed the latest commits. Found 3 critical issues:\n\n1. **Memory leak** in `auth/middleware.js` line 142\n2. **Race condition** in `api/tokens.js` — concurrent refresh calls\n3. **Deprecation** — legacy crypto APIs in `vault/encrypt.js`\n\nCreated issues on GitHub and updated Notion tracking doc.",tu:['github','openai','notion']},{text:"Research complete on OAuth 2.0 token rotation best practices:\n\n- **Sliding window rotation** reduces interruption by 73%\n- **Dual-token pattern** is industry standard\n- Auth0's Token Vault implements all OWASP recommendations\n\nFull report synced to Notion.",tu:['openai','notion']}],
+code:[{text:"Reviewed PR #247:\n\n**Security:** Token decryption validates IV length properly.\n**Performance:** Caching reduces vault lookups by ~60%.\n**Issue:** Missing error boundary in `rotateToken()`.\n\nAdded a comment with suggested fix.",tu:['anthropic','github']},{text:"Created middleware that:\n\n1. Intercepts outbound API calls\n2. Checks Token Vault for credentials\n3. Injects Bearer headers automatically\n4. Handles 401 with token refresh retry\n\nCommitted to `feat/auto-inject`, opened PR #251.",tu:['openai','github']}],
+data:[{text:"Pipeline executed on Google Cloud:\n\n- Processed 2.4M token access logs\n- Peak hours: 14:00-16:00 UTC\n- **Anomaly:** 847 unauthorized attempts from 203.0.113.0/24 — all blocked\n- Visualizations saved to S3\n\nML fraud detection accuracy: 97.3%",tu:['gcloud','aws','openai']},{text:"Sentiment analysis complete:\n\n- Positive: 78% | Neutral: 18% | Negative: 4%\n- Top request: Code review (34%)\n- Avg cost: $0.023/interaction\n- Optimize: Cache embeddings to cut OpenAI calls 40%",tu:['openai','gcloud']}],
+comms:[{text:"Summarized 47 Slack messages from 8 channels:\n\n**#engineering:** Token Vault v2.3.1 deployed\n**#security:** Auth0 audit passed\n**#product:** 3 new agent capability requests\n\nPosted to #team-digest, synced to Notion.",tu:['slack','openai','notion']},{text:"Channel cleanup:\n- Archived 12 inactive channels\n- Updated 5 descriptions with Vault guidelines\n- Posted security reminder in #announcements",tu:['slack','notion']}],
+finance:[{text:"Financial analysis (30 days):\n\n- **Total spend:** $847.32 (+18.3%)\n- OpenAI: $612.40 | Anthropic: $134.92\n- **Stripe revenue:** $24,500 (312 subs)\n- **Churn:** 2.1% (down from 3.4%)\n- **Anomaly:** Duplicate charge — auto-refund issued",tu:['stripe','openai']},{text:"Subscription metrics:\n- Active: 312 (+14 this month)\n- MRR: $24,500 (+$1,120)\n- Top tier: Pro (67%)\n- Vault usage → 23% higher retention\n- 8 renewals in next 7 days",tu:['stripe','openai']}]
+};
+const AD=[
+{icon:'fa-solid fa-arrow-right-to-bracket',color:'#10b981',text:'Research Agent accessed OpenAI token from Vault',time:'2 min ago'},
+{icon:'fa-solid fa-rotate',color:'#f59e0b',text:'Auto-rotation completed for Google Cloud Service Account',time:'15 min ago'},
+{icon:'fa-solid fa-code-branch',color:'#22d3ee',text:'Code Agent created PR #251 using GitHub OAuth token',time:'23 min ago'},
+{icon:'fa-solid fa-shield-halved',color:'#ef4444',text:'Blocked unauthorized token access from 203.0.113.42',time:'31 min ago'},
+{icon:'fa-solid fa-comments',color:'#e01e5a',text:'Communication Agent posted summary using Slack token',time:'45 min ago'},
+{icon:'fa-solid fa-plus',color:'#10b981',text:'New token added: AWS IAM Access Key (auto-rotation)',time:'1 hour ago'},
+{icon:'fa-solid fa-chart-pie',color:'#f59e0b',text:'Data Agent processed 2.4M logs via Google Cloud SA',time:'2 hours ago'},
+{icon:'fa-solid fa-coins',color:'#635bff',text:'Finance Agent queried Stripe for subscription analytics',time:'3 hours ago'}
+];
+const LE=[
+{time:'14:32:08',event:'Token Access',agent:'Research Agent',token:'OpenAI',status:'success',detail:'chat.completions.create — 847 tokens'},
+{time:'14:30:15',event:'Token Rotation',agent:'System',token:'Google Cloud',status:'success',detail:'SA key rotated — old key revoked'},
+{time:'14:28:42',event:'Agent Action',agent:'Code Agent',token:'GitHub',status:'success',detail:'Created PR #251 on nexusguard/core'},
+{time:'14:25:03',event:'Security Alert',agent:'System',token:'OpenAI',status:'blocked',detail:'Unauthorized from 203.0.113.42 — blocked'},
+{time:'14:22:17',event:'Token Access',agent:'Comms Agent',token:'Slack',status:'success',detail:'chat.postMessage to #team-digest'},
+{time:'14:20:55',event:'Token Access',agent:'Comms Agent',token:'Notion',status:'success',detail:'pages.update — weekly doc synced'},
+{time:'14:15:30',event:'Token Access',agent:'Data Agent',token:'Google Cloud',status:'success',detail:'ml.projects.predict — 50K records'},
+{time:'14:10:22',event:'Token Access',agent:'Data Agent',token:'AWS',status:'success',detail:'s3.putObject — report uploaded'},
+{time:'14:05:18',event:'Agent Action',agent:'Finance Agent',token:'Stripe',status:'success',detail:'charges.list — 312 subscriptions'},
+{time:'13:58:44',event:'Token Access',agent:'Research Agent',token:'GitHub',status:'success',detail:'repos.getContents — 23 files analyzed'},
+{time:'13:52:11',event:'Token Rotation',agent:'System',token:'AWS',status:'warning',detail:'IAM key expires in 7 days'},
+{time:'13:45:30',event:'Token Access',agent:'Code Agent',token:'Anthropic',status:'success',detail:'messages.create — code review 1.2K tokens'},
+{time:'13:40:08',event:'Security Alert',agent:'System',token:'Stripe',status:'success',detail:'Duplicate charge — auto-refund $49.99'},
+{time:'13:35:22',event:'Token Access',agent:'Research Agent',token:'Notion',status:'success',detail:'databases.query — 47 entries'},
+{time:'13:28:55',event:'Agent Action',agent:'Code Agent',token:'GitHub',status:'success',detail:'issues.create — 3 critical issues filed'}
+];
+const TF=[
+{ip:'203.0.113.42',type:'Brute Force',token:'OpenAI',time:'14:25:03',severity:'high',detail:'347 failed auth attempts in 5 min'},
+{ip:'198.51.100.17',type:'Token Replay',token:'GitHub',time:'14:18:22',severity:'high',detail:'Replayed expired OAuth token'},
+{ip:'192.0.2.89',type:'Rate Limit',token:'Anthropic',time:'14:12:45',severity:'medium',detail:'Exceeded 100 req/min threshold'},
+{ip:'203.0.113.78',type:'Anomaly',token:'Stripe',time:'14:08:11',severity:'medium',detail:'Unusual API pattern detected'},
+{ip:'198.51.100.55',type:'Brute Force',token:'AWS',time:'13:55:33',severity:'high',detail:'Failed IAM assume-role attempts'},
+{ip:'192.0.2.201',type:'Recon',token:'Slack',time:'13:48:07',severity:'low',detail:'Enumerating workspace channels'},
+{ip:'203.0.113.15',type:'Rate Limit',token:'Google Cloud',time:'13:42:19',severity:'medium',detail:'Exceeded storage API quota'},
+{ip:'198.51.100.92',type:'Anomaly',token:'Notion',time:'13:35:51',severity:'low',detail:'Access from new geo-location'}
+];
+
+let CS='dashboard',STU={},CH={research:[],code:[],data:[],comms:[],finance:[]},sessionStart=Date.now();
+
+// Particles
+const cv=document.getElementById('ptc'),cx=cv.getContext('2d');let pts=[];
+function rC(){cv.width=window.innerWidth;cv.height=window.innerHeight}
+window.addEventListener('resize',rC);rC();
+function cP(){pts=[];for(let i=0;i<40;i++)pts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,s:Math.random()*1.2+.4,o:Math.random()*.25+.04})}
+cP();
+function dP(){cx.clearRect(0,0,cv.width,cv.height);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=cv.width;if(p.x>cv.width)p.x=0;if(p.y<0)p.y=cv.height;if(p.y>cv.height)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.s,0,Math.PI*2);cx.fillStyle=`rgba(16,185,129,${p.o})`;cx.fill()});for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){cx.beginPath();cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);cx.strokeStyle=`rgba(16,185,129,${.025*(1-d/100)})`;cx.lineWidth=.5;cx.stroke()}}requestAnimationFrame(dP)}
+dP();
+
+// Mouse glow
+document.addEventListener('mousemove',e=>{const g=document.getElementById('mg');if(g){g.style.left=e.clientX+'px';g.style.top=e.clientY+'px'}});
+
+// Clock + Session timer
+function uClk(){const n=new Date();const el=document.getElementById('st');if(el)el.textContent=n.toTimeString().slice(0,8);
+const el2=document.getElementById('stm');if(el2){const s=Math.floor((Date.now()-sessionStart)/1000);const h=String(Math.floor(s/3600)).padStart(2,'0');const m=String(Math.floor((s%3600)/60)).padStart(2,'0');const sc=String(s%60).padStart(2,'0');el2.textContent=`${h}:${m}:${sc}`}}
+setInterval(uClk,1000);uClk();
+
+// Loader
+const lMsgs=['INITIALIZING SECURE CONNECTION','ESTABLISHING TLS 1.3 HANDSHAKE','AUTHENTICATING WITH AUTH0','LOADING TOKEN VAULT KEYS','VERIFYING AGENT PERMISSIONS','FINALIZING SECURE SESSION'];
+let lI=0;const lInt=setInterval(()=>{lI++;if(lI<lMsgs.length)document.getElementById('ls').textContent=lMsgs[lI]},600);
+window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('lb').style.width='100%'},100);setTimeout(()=>{clearInterval(lInt);document.getElementById('ld').style.opacity='0';setTimeout(()=>{document.getElementById('ld').style.display='none';document.getElementById('app').style.opacity='1';iC();aC()},2600)},2500)});
+
+// Sidebar toggle
+function toggleSB(){document.getElementById('sb').classList.toggle('open');document.getElementById('sov').classList.toggle('show')}
+// Notification
+function toggleNotif(){document.getElementById('nd').classList.toggle('hidden')}
+document.addEventListener('click',e=>{const nd=document.getElementById('nd');if(!nd.classList.contains('hidden')&&!nd.contains(e.target)&&!e.target.closest('[onclick*="toggleNotif"]'))nd.classList.add('hidden')});
+
+// Nav
+function go(n){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));document.getElementById('s-'+n).classList.add('on');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`[data-n="${n}"]`).classList.add('active');document.getElementById('bc').textContent={dashboard:'Dashboard',vault:'Token Vault',agents:'AI Agents',chat:'Agent Chat',logs:'Audit Logs',threats:'Threat Monitor'}[n];CS=n;document.getElementById('ms').scrollTop=0;if(n==='dashboard')aC();if(n==='chat')uCS()}
+
+// Toast
+function toast(m,t='success'){const b=document.getElementById('tb');const c={success:'border-vault-500/30 bg-vault-900/50',error:'border-red-500/30 bg-red-900/50',warning:'border-amb-500/30 bg-amb-900/50',info:'border-cyan-500/30 bg-cyan-900/50'};const ic={success:'fa-check-circle text-vault-400',error:'fa-times-circle text-red-400',warning:'fa-exclamation-triangle text-amb-400',info:'fa-info-circle text-cyan-400'};const el=document.createElement('div');el.className=`pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border ${c[t]} backdrop-blur-2xl shadow-2xl text-[11px] sm:text-[12px] max-w-[300px]`;el.innerHTML=`<i class="fa-solid ${ic[t]} flex-shrink-0"></i><span class="text-[#b0bab3]">${m}</span>`;b.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(20px)';el.style.transition='all .3s';setTimeout(()=>el.remove(),300)},4000)}
+
+// Modal
+function oM(h){const o=document.getElementById('mo'),c=document.getElementById('mc');c.innerHTML=h;o.classList.remove('hidden');o.classList.add('flex');requestAnimationFrame(()=>{c.style.transform='scale(1)';c.style.opacity='1'})}
+function clM(){const o=document.getElementById('mo'),c=document.getElementById('mc');c.style.transform='scale(.9)';c.style.opacity='0';setTimeout(()=>{o.classList.add('hidden');o.classList.remove('flex')},300)}
+
+function opAT(){oM(`<div class="p-5 sm:p-6"><div class="flex items-center justify-between mb-5"><div><h3 class="font-d font-bold text-lg">Add Token to Vault</h3><p class="text-[10px] sm:text-[11px] text-[#3a4a42] mt-0.5">Securely store in Auth0 Token Vault</p></div><button onclick="clM()" class="w-8 h-8 rounded-lg bg-sf-3 flex items-center justify-center text-[#3a4a42] hover:text-[#e8ede9] transition-colors"><i class="fa-solid fa-xmark text-sm"></i></button></div><div class="space-y-3.5"><div><label class="text-[9px] sm:text-[10px] text-[#4a5c52] mb-1.5 block font-semibold tracking-wide">SERVICE PROVIDER</label><select class="w-full bg-sf-3 border border-[#141e19] rounded-xl px-3 py-2.5 text-[12px] sm:text-[13px] text-[#e8ede9] focus:outline-none focus:border-vault-600/40"><option>OpenAI</option><option>Anthropic</option><option>GitHub</option><option>Google Cloud</option><option>AWS</option><option>Slack</option><option>Stripe</option><option>Notion</option><option>Custom OAuth 2.0</option></select></div><div><label class="text-[9px] sm:text-[10px] text-[#4a5c52] mb-1.5 block font-semibold tracking-wide">TOKEN / API KEY</label><div class="relative"><input type="password" placeholder="sk-..." class="w-full bg-sf-3 border border-[#141e19] rounded-xl px-3 py-2.5 text-[12px] sm:text-[13px] text-[#e8ede9] placeholder-[#2e3e35] focus:outline-none focus:border-vault-600/40 pr-10 font-mono" id="tif"><button onclick="const i=document.getElementById('tif');i.type=i.type==='password'?'text':'password'" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#3a4a42] hover:text-[#5a6a62] transition-colors"><i class="fa-solid fa-eye text-xs"></i></button></div></div><div><label class="text-[9px] sm:text-[10px] text-[#4a5c52] mb-1.5 block font-semibold tracking-wide">AUTH0 CONNECTION</label><select class="w-full bg-sf-3 border border-[#141e19] rounded-xl px-3 py-2.5 text-[12px] sm:text-[13px] text-[#e8ede9] focus:outline-none focus:border-vault-600/40"><option>Manual Entry (encrypted at rest)</option><option>OAuth 2.0 Authorization Code</option><option>Client Credentials Flow</option><option>OIDC Token Exchange</option></select></div><div><label class="text-[9px] sm:text-[10px] text-[#4a5c52] mb-1.5 block font-semibold tracking-wide">SCOPES</label><div class="flex flex-wrap gap-1.5"><label class="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#4a5c52] bg-sf-3 px-2.5 py-1.5 rounded-lg cursor-pointer hover:text-[#b0bab3] transition-colors border border-[#141e19]"><input type="checkbox" checked class="accent-[#10b981] w-3 h-3">read</label><label class="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#4a5c52] bg-sf-3 px-2.5 py-1.5 rounded-lg cursor-pointer hover:text-[#b0bab3] transition-colors border border-[#141e19]"><input type="checkbox" checked class="accent-[#10b981] w-3 h-3">write</label><label class="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#4a5c52] bg-sf-3 px-2.5 py-1.5 rounded-lg cursor-pointer hover:text-[#b0bab3] transition-colors border border-[#141e19]"><input type="checkbox" class="accent-[#10b981] w-3 h-3">admin</label><label class="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#4a5c52] bg-sf-3 px-2.5 py-1.5 rounded-lg cursor-pointer hover:text-[#b0bab3] transition-colors border border-[#141e19]"><input type="checkbox" class="accent-[#10b981] w-3 h-3">delete</label></div></div><div class="flex items-center justify-between bg-sf-3/50 rounded-xl px-4 py-3 border border-[#141e19]"><div><p class="text-[12px] sm:text-[13px] font-medium">Auto-Rotation</p><p class="text-[9px] sm:text-[10px] text-[#2e3e35]">Rotate token before expiry</p></div><div class="w-10 h-5 bg-vault-600 rounded-full relative cursor-pointer" onclick="this.classList.toggle('bg-vault-600');this.classList.toggle('bg-sf-4');this.querySelector('div').classList.toggle('translate-x-5')"><div class="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform translate-x-5 shadow-md"></div></div></div><div class="flex gap-2.5 pt-1"><button onclick="clM()" class="flex-1 py-2.5 sm:py-3 rounded-xl border border-[#141e19] text-[12px] sm:text-[13px] text-[#4a5c52] hover:text-[#b0bab3] transition-all">Cancel</button><button onclick="clM();toast('Token securely stored in Auth0 Token Vault','success')" class="flex-1 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-vault-600 to-vault-700 hover:from-vault-500 hover:to-vault-600 text-white text-[12px] sm:text-[13px] font-semibold transition-all shadow-xl shadow-vault-900/40">Secure & Store</button></div></div></div>`)}
+
+function opTD(id){const t=T.find(x=>x.id===id);if(!t)return;const sc={active:'text-vault-400 bg-vault-500/10 border-vault-500/10',rotating:'text-amb-400 bg-amb-500/10 border-amb-500/10',expiring:'text-red-400 bg-red-500/10 border-red-500/10'};const hc=t.health>=90?'text-vault-400':t.health>=60?'text-amb-400':'text-red-400';
+oM(`<div class="p-5 sm:p-6"><div class="flex items-center justify-between mb-5"><div class="flex items-center gap-3"><div class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl border" style="background:${t.color}08;border-color:${t.color}15;color:${t.color}"><i class="${t.icon}"></i></div><div><h3 class="font-d font-bold text-lg sm:text-xl">${t.name}</h3><p class="text-[10px] sm:text-[11px] text-[#4a5c52] mt-0.5">${t.type}</p></div></div><button onclick="clM()" class="w-8 h-8 rounded-lg bg-sf-3 flex items-center justify-center text-[#3a4a42] hover:text-[#e8ede9] transition-colors"><i class="fa-solid fa-xmark text-sm"></i></button></div><div class="grid grid-cols-2 gap-2.5 mb-4"><div class="bg-sf-3/50 rounded-xl p-3.5 border border-[#141e19]"><p class="text-[8px] sm:text-[9px] text-[#3a4a42] tracking-[0.15em] mb-1.5 font-bold">STATUS</p><span class="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold ${sc[t.status]} px-2 py-0.5 sm:py-1 rounded-lg border capitalize"><span class="w-1.5 h-1.5 rounded-full bg-current"></span>${t.status}</span></div><div class="bg-sf-3/50 rounded-xl p-3.5 border border-[#141e19]"><p class="text-[8px] sm:text-[9px] text-[#3a4a42] tracking-[0.15em] mb-1.5 font-bold">HEALTH</p><p class="text-xl font-d font-bold ${hc}">${t.health}%</p></div><div class="bg-sf-3/50 rounded-xl p-3.5 border border-[#141e19]"><p class="text-[8px] sm:text-[9px] text-[#3a4a42] tracking-[0.15em] mb-1.5 font-bold">TOKEN</p><p class="text-[10px] sm:text-[11px] font-mono text-[#4a5c52]">${t.masked}</p></div><div class="bg-sf-3/50 rounded-xl p-3.5 border border-[#141e19]"><p class="text-[8px] sm:text-[9px] text-[#3a4a42] tracking-[0.15em] mb-1.5 font-bold">REQUESTS</p><p class="text-xl font-d font-bold">${t.requests.toLocaleString()}</p></div></div><div class="mb-4"><p class="text-[8px] sm:text-[9px] text-[#3a4a42] tracking-[0.15em] mb-2 font-bold">SCOPES</p><div class="flex flex-wrap gap-1">${t.scopes.map(s=>`<span class="text-[9px] sm:text-[10px] px-2 py-0.5 sm:py-1 rounded-lg bg-sf-3 text-[#5a6a62] border border-[#141e19]">${s}</span>`).join('')}</div></div><div class="mb-4 bg-vault-900/10 border border-vault-700/10 rounded-xl px-3.5 py-2.5"><div class="flex items-center gap-2 text-[10px] sm:text-[11px] text-vault-400"><i class="fa-solid fa-lock text-[9px]"></i>AES-256-GCM encrypted via Auth0 Token Vault</div></div><div class="flex gap-2.5"><button onclick="clM();rT('${t.id}')" class="flex-1 py-2.5 sm:py-3 rounded-xl border border-amb-500/20 text-amb-400 text-[11px] sm:text-[12px] font-semibold hover:bg-amb-500/5 transition-all"><i class="fa-solid fa-rotate mr-1"></i>Rotate</button><button onclick="clM();toast('Token revoked','warning')" class="flex-1 py-2.5 sm:py-3 rounded-xl border border-red-500/20 text-red-400 text-[11px] sm:text-[12px] font-semibold hover:bg-red-500/5 transition-all"><i class="fa-solid fa-ban mr-1"></i>Revoke</button></div></div>`)}
+
+function rT(id){const t=T.find(x=>x.id===id);if(t){t.status='rotating';rTG();toast(`Rotating ${t.name}...`,'info');setTimeout(()=>{t.status='active';rTG();toast(`${t.name} rotated`,'success')},3000)}}
+
+// Render functions
+function rAS(){document.getElementById('asl').innerHTML=A.map(a=>`<div class="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl hover:bg-sf-3/40 transition-all cursor-pointer" onclick="go('chat');document.getElementById('cas').value='${a.id}'"><div class="w-8 h-8 rounded-xl flex items-center justify-center text-[10px] sm:text-xs border flex-shrink-0" style="background:${a.color}08;border-color:${a.color}10;color:${a.color}"><i class="${a.icon}"></i></div><div class="flex-1 min-w-0"><p class="text-[11px] sm:text-[12px] font-medium truncate">${a.name}</p><p class="text-[9px] sm:text-[10px] text-[#2e3e35]">${a.lastActive}</p></div><span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-vault-500 sd" style="color:#10b981"></span></div>`).join('')}
+
+function rAF(){document.getElementById('af').innerHTML=AD.map(a=>`<div class="flex items-start gap-2.5 sm:gap-3 p-2 sm:p-2.5 rounded-xl hover:bg-sf-3/30 transition-all"><div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 border" style="background:${a.color}06;border-color:${a.color}10"><i class="${a.icon} text-[9px] sm:text-[10px]" style="color:${a.color}"></i></div><div class="flex-1 min-w-0"><p class="text-[10px] sm:text-[11px] sm:text-[12px] text-[#8a9a90]">${a.text}</p></div><span class="text-[9px] sm:text-[10px] text-[#2e3e35] flex-shrink-0 mt-0.5">${a.time}</span></div>`).join('')}
+
+function rTH(){document.getElementById('thp').innerHTML=T.slice(0,4).map(t=>{const hc=t.health>=90?'#10b981':t.health>=60?'#f59e0b':'#ef4444';return`<div class="bg-sf-3/30 border border-[#141e19] rounded-xl p-3 sm:p-4"><div class="flex items-center gap-2 mb-2"><i class="${t.icon} text-[10px]" style="color:${t.color}"></i><span class="text-[10px] sm:text-[11px] font-medium truncate">${t.name}</span></div><div class="hp"><div class="fill" style="width:${t.health}%;background:${hc}"></div></div><div class="flex justify-between mt-1.5"><span class="text-[9px] text-[#3a4a42]">${t.health}%</span><span class="text-[9px]" style="color:${hc}">${t.health>=90?'Healthy':t.health>=60?'Warning':'Critical'}</span></div></div>`}).join('')}
+
+function rTG(){const el=document.getElementById('tg');const sm={active:{l:'Active',c:'text-vault-400 bg-vault-500/8 border-vault-500/10',d:'bg-vault-500'},rotating:{l:'Rotating',c:'text-amb-400 bg-amb-500/8 border-amb-500/10',d:'bg-amb-500'},expiring:{l:'Expiring',c:'text-red-400 bg-red-500/8 border-red-500/10',d:'bg-red-500'}};
+el.innerHTML=T.map(t=>{const s=sm[t.status];const hc=t.health>=90?'#10b981':t.health>=60?'#f59e0b':'#ef4444';return`<div class="tc cursor-pointer" onclick="opTD('${t.id}')"><div class="flex items-center justify-between mb-3"><div class="flex items-center gap-2.5"><div class="w-9 h-9 rounded-xl flex items-center justify-center text-base sm:text-lg border" style="background:${t.color}08;border-color:${t.color}12;color:${t.color}"><i class="${t.icon}"></i></div><div><p class="text-[12px] sm:text-[13px] font-semibold">${t.name}</p><p class="text-[9px] sm:text-[10px] text-[#3a4a42]">${t.type}</p></div></div><span class="flex items-center gap-1 text-[8px] sm:text-[9px] font-bold ${s.c} px-2 py-0.5 sm:py-1 rounded-lg border tracking-wide"><span class="w-1.5 h-1.5 rounded-full ${s.d} ${t.status==='active'?'sd':''}" ${t.status==='active'?'style="color:#10b981"':''}></span>${s.l}</span></div><div class="flex items-center gap-2 mb-2.5 bg-sf-0/60 rounded-xl px-3 py-2 border border-[#0f1410]"><i class="fa-solid fa-key text-[7px] sm:text-[8px] text-[#2e3e35]"></i><span class="text-[10px] sm:text-[11px] font-mono text-[#4a5c52]">${t.masked}</span><button onclick="event.stopPropagation();navigator.clipboard.writeText('${t.masked}');toast('Copied','info')" class="ml-auto text-[#2e3e35] hover:text-vault-400 transition-colors"><i class="fa-regular fa-copy text-[9px] sm:text-[10px]"></i></button></div><div class="flex items-center gap-2 mb-3"><div class="hp flex-1"><div class="fill" style="width:${t.health}%;background:${hc}"></div></div><span class="text-[9px] font-mono" style="color:${hc}">${t.health}%</span></div><div class="flex items-center justify-between text-[9px] sm:text-[10px] text-[#2e3e35] pt-3 border-t border-[#0f1410]"><span><i class="fa-regular fa-clock mr-1"></i>${t.lastUsed}</span><span>${t.requests.toLocaleString()} req</span>${t.autoRefresh?'<span class="text-vault-600 font-medium"><i class="fa-solid fa-rotate mr-0.5"></i>Auto</span>':'<span>Manual</span>'}</div></div>`}).join('')}
+
+function rVAL(){document.getElementById('val').innerHTML=LE.slice(0,8).map(l=>{const sc={success:'text-vault-400',warning:'text-amb-400',blocked:'text-red-400'};return`<div class="flex items-center gap-2.5 py-2 px-2 sm:px-3 rounded-xl hover:bg-sf-3/30 transition-all"><span class="text-[9px] sm:text-[10px] text-[#2e3e35] font-mono w-14 flex-shrink-0">${l.time}</span><span class="${sc[l.status]} flex-shrink-0"><i class="fa-solid fa-${l.status==='success'?'check-circle':l.status==='warning'?'exclamation-triangle':'times-circle'} text-[9px] sm:text-[10px]"></i></span><span class="text-[10px] sm:text-[11px] text-[#5a6a62] flex-1 truncate">${l.agent} → ${l.token}</span><span class="text-[8px] sm:text-[9px] text-[#2e3e35] flex-shrink-0 tracking-wide">${l.event}</span></div>`}).join('')}
+
+function rAG(){document.getElementById('ag').innerHTML=A.map(a=>`<div class="ac"><div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5"><div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-base sm:text-xl relative border flex-shrink-0" style="background:${a.color}08;border-color:${a.color}12;color:${a.color}"><i class="${a.icon}"></i><span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-vault-500 rounded-full border-2 border-sf-0"></span></div><div class="flex-1 min-w-0"><h3 class="font-d font-bold text-sm sm:text-base">${a.name}</h3><p class="text-[10px] sm:text-[11px] text-[#3a4a42] mt-0.5">${a.tasks} tasks · ${a.lastActive}</p></div></div><p class="text-[11px] sm:text-[12px] text-[#5a6a62] mb-3 sm:mb-4 leading-relaxed">${a.desc}</p><div class="flex flex-wrap gap-1 sm:gap-1.5 mb-3 sm:mb-4">${a.capabilities.map(c=>`<span class="text-[9px] sm:text-[10px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg border border-[#141e19] text-[#4a5c52]">${c}</span>`).join('')}</div><div class="pt-3 sm:pt-4 border-t border-[#0f1410]"><p class="text-[8px] sm:text-[9px] text-[#2e3e35] tracking-[0.15em] mb-2 font-bold">VAULT TOKENS</p><div class="flex flex-wrap gap-1.5 sm:gap-2">${a.tokens.map(tid=>{const t=T.find(x=>x.id===tid);return t?`<div class="flex items-center gap-1 text-[9px] sm:text-[10px] bg-sf-3/50 px-2 py-1 sm:py-1.5 rounded-lg border border-[#141e19]"><i class="${t.icon}" style="color:${t.color};font-size:8px"></i><span class="text-[#5a6a62]">${t.name}</span></div>`:''}).join('')}</div></div><button onclick="go('chat');document.getElementById('cas').value='${a.id}'" class="mt-3 sm:mt-4 w-full py-2 sm:py-2.5 rounded-xl border border-[#141e19] text-[10px] sm:text-[11px] text-[#4a5c52] hover:text-vault-400 hover:border-vault-600/20 transition-all flex items-center justify-center gap-1.5 font-medium"><i class="fa-solid fa-comments text-[9px] sm:text-[10px]"></i>Interact</button></div>`).join('')}
+
+function rLT(){const sb={success:'<span class="text-vault-400 text-[9px] sm:text-[10px] bg-vault-500/8 px-2 py-0.5 sm:py-1 rounded-lg border border-vault-500/10 font-semibold">Success</span>',warning:'<span class="text-amb-400 text-[9px] sm:text-[10px] bg-amb-500/8 px-2 py-0.5 sm:py-1 rounded-lg border border-amb-500/10 font-semibold">Warning</span>',blocked:'<span class="text-red-400 text-[9px] sm:text-[10px] bg-red-500/8 px-2 py-0.5 sm:py-1 rounded-lg border border-red-500/10 font-semibold">Blocked</span>'};
+document.getElementById('ltb').innerHTML=LE.map(l=>`<tr class="lr border-b border-[#0f1410]"><td class="px-4 sm:px-5 py-2.5 sm:py-3 text-[10px] sm:text-[11px] font-mono text-[#2e3e35]">${l.time}</td><td class="px-4 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-[12px] text-[#8a9a90]">${l.event}</td><td class="px-4 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-[12px] text-[#5a6a62]">${l.agent}</td><td class="px-4 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-[12px] font-medium">${l.token}</td><td class="px-4 sm:px-5 py-2.5 sm:py-3">${sb[l.status]}</td><td class="px-4 sm:px-5 py-2.5 sm:py-3 text-[10px] sm:text-[11px] text-[#3a4a42] max-w-[180px] sm:max-w-xs truncate">${l.detail}</td></tr>`).join('')}
+
+function rTF(){const sc={high:'text-red-400 bg-red-500/8 border-red-500/10',medium:'text-amb-400 bg-amb-500/8 border-amb-500/10',low:'text-cyan-400 bg-cyan-500/8 border-cyan-500/10'};document.getElementById('tfeed').innerHTML=TF.map(t=>`<div class="threat-row flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl hover:bg-sf-3/30 transition-all border border-[#0f1410]"><div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${sc[t.severity].split(' ').slice(0,2).join(' ')}"><i class="fa-solid fa-${t.severity==='high'?'skull-crossbones':t.severity==='medium'?'exclamation':'eye'} text-[9px] sm:text-[10px]"></i></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-0.5"><span class="text-[10px] sm:text-[11px] font-mono font-semibold text-[#b0bab3]">${t.ip}</span><span class="text-[8px] sm:text-[9px] ${sc[t.severity].split(' ')[0]} px-1.5 py-0.5 rounded font-bold uppercase tracking-wide border">${t.severity}</span></div><p class="text-[9px] sm:text-[10px] text-[#5a6a62]">${t.type} — ${t.detail}</p></div><div class="text-right flex-shrink-0"><p class="text-[9px] sm:text-[10px] text-[#5a6a62]">${t.token}</p><p class="text-[8px] sm:text-[9px] text-[#2e3e35] font-mono">${t.time}</p></div></div>`).join('')}
+
+// Chat
+function uCS(){const id=document.getElementById('cas').value;const ag=A.find(a=>a.id===id);const se=document.getElementById('session-tokens');const ut=Object.keys(STU);
+se.innerHTML=ut.length===0?'<p class="text-[9px] sm:text-[10px] text-[#2e3e35] italic">No tokens accessed yet</p>':ut.map(tid=>{const t=T.find(x=>x.id===tid);return t?`<div class="flex items-center justify-between bg-sf-2/60 rounded-xl px-2.5 sm:px-3 py-2 border border-[#141e19]"><div class="flex items-center gap-1.5"><i class="${t.icon} text-[8px] sm:text-[9px]" style="color:${t.color}"></i><span class="text-[9px] sm:text-[10px] text-[#5a6a62]">${t.name}</span></div><span class="text-[8px] sm:text-[9px] text-[#2e3e35] font-mono">${STU[tid]}x</span></div>`:''}).join('');
+document.getElementById('agent-capabilities').innerHTML=ag?ag.capabilities.map(c=>`<div class="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-[#4a5c52]"><i class="fa-solid fa-check text-vault-700 text-[7px]"></i>${c}</div>`).join(''):''}
+
+function aCB(r,h,tn){const c=document.getElementById('cm');const d=document.createElement('div');d.className=`cb flex ${r==='u'?'justify-end':'justify-start'}`;
+if(r==='u')d.innerHTML=`<div class="bg-vault-600/15 border border-vault-600/15 rounded-2xl rounded-tr-md px-3.5 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-[13px] text-[#d0d8d2]">${h}</div>`;
+else{const tb=tn?`<div class="flex flex-wrap gap-1 mt-2.5 pt-2.5 border-t border-[#0f1410]">${tn.map(tid=>{const t=T.find(x=>x.id===tid);return t?`<span class="inline-flex items-center gap-1 text-[7px] sm:text-[8px] px-1.5 sm:px-2 py-0.5 rounded-md bg-sf-3/80 text-[#3a4a42] border border-[#141e19]"><i class="${t.icon}" style="color:${t.color};font-size:6px sm:7px"></i>Vault: ${t.name}</span>`:''}).join('')}</div>`:'';d.innerHTML=`<div class="flex items-start gap-2 sm:gap-2.5 max-w-[88%]"><div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-sf-3/80 flex items-center justify-center flex-shrink-0 border border-[#141e19]"><i class="fa-solid fa-robot text-[9px] sm:text-[10px] text-vault-400"></i></div><div class="bg-sf-2/80 border border-[#141e19] rounded-2xl rounded-tl-md px-3.5 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-[12px] text-[#8a9a90] leading-relaxed">${h.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong class="text-[#d0d8d2]">$1</strong>')}${tb}</div></div>`}
+c.appendChild(d);c.scrollTop=c.scrollHeight}
+
+function sTI(){const c=document.getElementById('cm');const d=document.createElement('div');d.id='tii';d.className='cb flex justify-start';d.innerHTML=`<div class="flex items-start gap-2 sm:gap-2.5"><div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-sf-3/80 flex items-center justify-center flex-shrink-0 border border-[#141e19]"><i class="fa-solid fa-robot text-[9px] sm:text-[10px] text-vault-400"></i></div><div class="bg-sf-2/80 border border-[#141e19] rounded-2xl rounded-tl-md px-4 sm:px-5 py-3 sm:py-4 flex items-center gap-2"><span class="td"></span><span class="td"></span><span class="td"></span></div></div>`;c.appendChild(d);c.scrollTop=c.scrollHeight}
+function rTI(){const e=document.getElementById('tii');if(e)e.remove()}
+
+function sCTA(ti){const ind=document.getElementById('cti');const con=document.getElementById('ctu');con.innerHTML=ti.map(tid=>{const t=T.find(x=>x.id===tid);return t?`<span class="inline-flex items-center gap-1 text-[7px] sm:text-[9px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-vault-500/8 border border-vault-500/10 text-vault-400 font-medium flex-shrink-0">${t.name}</span>`:''}).join('');ind.style.opacity='1';ti.forEach(tid=>{STU[tid]=(STU[tid]||0)+1});uCS();setTimeout(()=>{ind.style.opacity='0'},5000)}
+
+function qs(t){document.getElementById('ci').value=t;sc()}
+
+function sc(){const i=document.getElementById('ci');const t=i.value.trim();if(!t)return;const id=document.getElementById('cas').value;aCB('u',t);i.value='';CH[id].push({r:'u',t});const rs=CR[id];const r=rs[Math.floor(Math.random()*rs.length)];sCTA(r.tu);setTimeout(()=>sTI(),400);setTimeout(()=>{rTI();aCB('a',r.text,r.tu);CH[id].push({r:'a',t:r.text})},1800+Math.random()*1500)}
+
+function iC(){const id=document.getElementById('cas').value;const ag=A.find(a=>a.id===id);aCB('a',`Hello! I'm the **${ag.name}**. Securely connected to Auth0 Token Vault.\n\nScoped tokens: ${ag.tokens.map(tid=>{const t=T.find(x=>x.id===tid);return t?t.name:''}).filter(Boolean).join(', ')}.\n\nAll access is encrypted, logged, and auto-rotated. How can I help?`,ag.tokens);uCS()}
+document.getElementById('cas').addEventListener('change',()=>{document.getElementById('cm').innerHTML='';iC()});
+
+// Charts
+function iC2(){const c1=document.getElementById('uc');if(!c1)return;const g=c1.getContext('2d').createLinearGradient(0,0,0,160);g.addColorStop(0,'rgba(16,185,129,0.12)');g.addColorStop(1,'rgba(16,185,129,0)');
+new Chart(c1,{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'API Calls',data:[8420,9130,10240,9870,11200,7650,12840],borderColor:'#10b981',backgroundColor:g,borderWidth:2,fill:true,tension:.4,pointBackgroundColor:'#10b981',pointBorderColor:'#0c0e10',pointBorderWidth:2,pointRadius:3,pointHoverRadius:6},{label:'Vault Lookups',data:[4200,4650,5120,4930,5600,3820,6420],borderColor:'#fbbf24',borderWidth:1.5,borderDash:[5,5],fill:false,tension:.4,pointRadius:0,pointHoverRadius:4,pointBackgroundColor:'#fbbf24'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',align:'end',labels:{color:'#3a4a42',font:{size:9,family:'DM Sans'},boxWidth:12,boxHeight:2,padding:12}},tooltip:{backgroundColor:'#121516',titleColor:'#e8ede9',bodyColor:'#8a9a90',borderColor:'#141e19',borderWidth:1,padding:10,titleFont:{family:'Space Grotesk',weight:'600',size:11},bodyFont:{family:'DM Sans',size:10},displayColors:false,cornerRadius:8}},scales:{x:{grid:{color:'#141e1910'},ticks:{color:'#2e3e35',font:{size:9,family:'DM Sans'}}},y:{grid:{color:'#141e1910'},ticks:{color:'#2e3e35',font:{size:9,family:'DM Sans'},callback:v=>v>=1000?(v/1000)+'K':v}}},interaction:{intersect:false,mode:'index'}}});
+
+const c2=document.getElementById('bc');if(!c2)return;
+new Chart(c2,{type:'bar',data:{labels:T.map(t=>t.name.split(' ')[0]),datasets:[{data:T.map(t=>t.requests),backgroundColor:T.map(t=>t.color+'30'),borderColor:T.map(t=>t.color+'60'),borderWidth:1,borderRadius:5,barThickness:14}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#121516',titleColor:'#e8ede9',bodyColor:'#8a9a90',borderColor:'#141e19',borderWidth:1,padding:10,titleFont:{family:'Space Grotesk',weight:'600',size:11},bodyFont:{family:'DM Sans',size:10},displayColors:false,cornerRadius:8,callbacks:{label:c=>c.parsed.y.toLocaleString()+' requests'}}},scales:{x:{grid:{display:false},ticks:{color:'#2e3e35',font:{size:8,family:'DM Sans'}}},y:{grid:{color:'#141e1910'},ticks:{color:'#2e3e35',font:{size:8,family:'DM Sans'},callback:v=>v>=1000?(v/1000)+'K':v}}}}})}
+
+function aC(){document.querySelectorAll('.ctr').forEach(el=>{const tgt=parseInt(el.dataset.t);let cur=0;const step=Math.max(1,Math.floor(tgt/25));const iv=setInterval(()=>{cur+=step;if(cur>=tgt){cur=tgt;clearInterval(iv)}el.textContent=cur},50)})}
+
+// Init
+rAS();rAF();rTH();rTG();rVAL();rAG();rLT();rTF();setTimeout(iC,2800);
+</script>
+</body>
+</html>
